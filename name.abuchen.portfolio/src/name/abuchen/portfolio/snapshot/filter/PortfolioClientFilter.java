@@ -231,6 +231,15 @@ public class PortfolioClientFilter implements ClientFilter
                         processedDividendTx.add(t);
                     }
                     break;
+                case DIVIDEND_REVERSAL:
+                    if (!processedDividendTx.contains(t))
+                    {
+                        pseudoAccount.internalAddTransaction(t);
+                        pseudoAccount.internalAddTransaction(new AccountTransaction(t.getDateTime(),
+                                        t.getCurrencyCode(), t.getAmount(), null, AccountTransaction.Type.DEPOSIT));
+                        processedDividendTx.add(t);
+                    }
+                    break;
                 case TAXES:
                 case FEES:
                     if (!processedDividendTx.contains(t))
@@ -295,6 +304,12 @@ public class PortfolioClientFilter implements ClientFilter
                         pseudoAccount.internalAddTransaction(t);
                     else
                         pseudoAccount.internalAddTransaction(convertTo(t, AccountTransaction.Type.DEPOSIT));
+                    break;
+                case DIVIDEND_REVERSAL:
+                    if (t.getSecurity() == null || usedSecurities.contains(t.getSecurity()))
+                        pseudoAccount.internalAddTransaction(t);
+                    else
+                        pseudoAccount.internalAddTransaction(convertTo(t, AccountTransaction.Type.REMOVAL));
                     break;
                 case TAXES:
                 case FEES:

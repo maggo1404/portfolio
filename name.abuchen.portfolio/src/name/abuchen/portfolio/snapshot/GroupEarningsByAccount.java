@@ -103,6 +103,12 @@ public class GroupEarningsByAccount
                             taxes.add(at.getUnitSum(Unit.Type.TAX));
                             fees.add(at.getUnitSum(Unit.Type.FEE));
                             break;
+                        case DIVIDEND_REVERSAL:
+                            dividends.subtract(at.getGrossValue());
+                            sum.subtract(at.getGrossValue());
+                            taxes.subtract(at.getUnitSum(Unit.Type.TAX));
+                            fees.subtract(at.getUnitSum(Unit.Type.FEE));
+                            break;
                         case INTEREST:
                             interest.add(at.getGrossValue());
                             sum.add(at.getGrossValue());

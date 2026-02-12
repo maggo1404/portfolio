@@ -149,6 +149,13 @@ import name.abuchen.portfolio.util.Interval;
                                         addValue(fees, t.getCurrencyCode(), t.getUnitSum(Type.FEE).getAmount(),
                                                         interval, d);
                                         break;
+                                    case DIVIDEND_REVERSAL:
+                                        addValue(taxes, t.getCurrencyCode(), -t.getUnitSum(Unit.Type.TAX).getAmount(),
+                                                        interval, d);
+                                        addValue(dividends, t.getCurrencyCode(), -t.getAmount(), interval, d);
+                                        addValue(fees, t.getCurrencyCode(), -t.getUnitSum(Type.FEE).getAmount(),
+                                                        interval, d);
+                                        break;
                                     case INTEREST:
                                         addValue(taxes, t.getCurrencyCode(), t.getUnitSum(Unit.Type.TAX).getAmount(),
                                                         interval, d);

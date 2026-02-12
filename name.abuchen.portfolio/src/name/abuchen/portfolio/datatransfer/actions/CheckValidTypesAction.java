@@ -24,6 +24,7 @@ public class CheckValidTypesAction implements ImportAction
                                 transaction.getType().toString()));
             case DEPOSIT:
             case DIVIDENDS:
+            case DIVIDEND_REVERSAL:
             case INTEREST:
             case INTEREST_CHARGE:
             case TAX_REFUND:

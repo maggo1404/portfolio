@@ -161,7 +161,7 @@ import name.abuchen.portfolio.money.Money;
                 }
 
                 break;
-            case DIVIDENDS: // NOSONAR
+            case DIVIDENDS, DIVIDEND_REVERSAL: // NOSONAR
                 // dividends must have a security
                 if (security == null)
                     throw new ParseException(MessageFormat.format(Messages.CSVImportMissingSecurity,
@@ -177,13 +177,13 @@ import name.abuchen.portfolio.money.Money;
                 t.setType(type);
                 t.setAmount(Math.abs(amount.getAmount()));
                 t.setCurrencyCode(amount.getCurrencyCode());
-                if (type == Type.DIVIDENDS || type == Type.TAXES || type == Type.TAX_REFUND || type == Type.FEES
+                if (type == Type.DIVIDENDS || type == Type.DIVIDEND_REVERSAL || type == Type.TAXES || type == Type.TAX_REFUND || type == Type.FEES
                                 || type == Type.FEES_REFUND)
                     t.setSecurity(security);
                 t.setDateTime(date);
                 t.setNote(note);
 
-                if (type == Type.DIVIDENDS)
+                if (type == Type.DIVIDENDS || type == Type.DIVIDEND_REVERSAL)
                 {
                     if (shares != null)
                         t.setShares(Math.abs(shares));
@@ -242,7 +242,7 @@ import name.abuchen.portfolio.money.Money;
         if (type == null)
         {
             if (security != null)
-                type = amount.isNegative() ? AccountTransaction.Type.REMOVAL : AccountTransaction.Type.DIVIDENDS;
+                type = amount.isNegative() ? AccountTransaction.Type.DIVIDEND_REVERSAL : AccountTransaction.Type.DIVIDENDS;
             else
                 type = amount.isNegative() ? AccountTransaction.Type.REMOVAL : AccountTransaction.Type.DEPOSIT;
         }

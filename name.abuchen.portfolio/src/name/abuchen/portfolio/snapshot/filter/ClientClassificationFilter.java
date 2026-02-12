@@ -316,6 +316,14 @@ public class ClientClassificationFilter implements ClientFilter
                         addSecurityRelatedAccountT(state, account, t);
                     break;
 
+                case DIVIDEND_REVERSAL:
+                    if (!state.isCategorized(t.getSecurity()))
+                        state.asReadOnly(account).internalAddTransaction(new AccountTransaction(t.getDateTime(),
+                                        t.getCurrencyCode(), amount, null, AccountTransaction.Type.REMOVAL));
+                    else
+                        addSecurityRelatedAccountT(state, account, t);
+                    break;
+
                 case FEES_REFUND:
                     if (t.getSecurity() != null && state.isCategorized(t.getSecurity()))
                         addSecurityRelatedAccountT(state, account, t);
@@ -504,6 +512,19 @@ public class ClientClassificationFilter implements ClientFilter
                     readOnlyAccount.internalAddTransaction(copy);
                     readOnlyAccount.internalAddTransaction(new AccountTransaction(t.getDateTime(), t.getCurrencyCode(),
                                     amount + taxes, null, AccountTransaction.Type.REMOVAL));
+                    break;
+                case DIVIDEND_REVERSAL:
+                    long revTaxes = value(t.getUnitSum(Unit.Type.TAX).getAmount(), weight);
+                    long revAmount = value(t.getAmount(), weight);
+
+                    AccountTransaction revCopy = new AccountTransaction(t.getDateTime(), t.getCurrencyCode(),
+                                    revAmount + revTaxes, t.getSecurity(), t.getType());
+
+                    t.getUnits().filter(u -> u.getType() != Unit.Type.TAX).forEach(u -> revCopy.addUnit(value(u, weight)));
+
+                    readOnlyAccount.internalAddTransaction(revCopy);
+                    readOnlyAccount.internalAddTransaction(new AccountTransaction(t.getDateTime(), t.getCurrencyCode(),
+                                    revAmount + revTaxes, null, AccountTransaction.Type.DEPOSIT));
                     break;
                 case FEES:
                     readOnlyAccount.internalAddTransaction(new AccountTransaction(t.getDateTime(), t.getCurrencyCode(),

@@ -154,6 +154,7 @@ public class WithoutTaxesFilter implements ClientFilter
                     pseudoAccount.internalAddTransaction(convertTo(t, AccountTransaction.Type.REMOVAL));
                     break;
                 case DIVIDENDS:
+                case DIVIDEND_REVERSAL:
                 case INTEREST:
                     stripTaxes(t, pseudoAccount);
                     break;

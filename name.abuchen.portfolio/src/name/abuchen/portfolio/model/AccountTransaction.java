@@ -13,7 +13,7 @@ public class AccountTransaction extends Transaction
     {
         DEPOSIT(false), REMOVAL(true), //
         INTEREST(false), INTEREST_CHARGE(true), //
-        DIVIDENDS(false), //
+        DIVIDENDS(false), DIVIDEND_REVERSAL(true), //
         FEES(true), FEES_REFUND(false), //
         TAXES(true), TAX_REFUND(false), //
         BUY(true), SELL(false), //

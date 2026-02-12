@@ -124,6 +124,20 @@ public class ClientSecurityFilter implements ClientFilter
                                 .internalAddTransaction(new AccountTransaction(t.getDateTime(), t.getCurrencyCode(),
                                                 amount + taxes, null, AccountTransaction.Type.REMOVAL));
                 break;
+            case DIVIDEND_REVERSAL:
+                long revTaxes = t.getUnitSum(Unit.Type.TAX).getAmount();
+                long revAmount = t.getAmount();
+
+                AccountTransaction revCopy = new AccountTransaction(t.getDateTime(), t.getCurrencyCode(), revAmount + revTaxes,
+                                t.getSecurity(), t.getType());
+
+                t.getUnits().filter(u -> u.getType() != Unit.Type.TAX).forEach(revCopy::addUnit);
+
+                getAccount.apply((Account) pair.getOwner()).internalAddTransaction(revCopy);
+                getAccount.apply((Account) pair.getOwner())
+                                .internalAddTransaction(new AccountTransaction(t.getDateTime(), t.getCurrencyCode(),
+                                                revAmount + revTaxes, null, AccountTransaction.Type.DEPOSIT));
+                break;
             case FEES:
                 getAccount.apply((Account) pair.getOwner()).internalAddTransaction(t);
                 getAccount.apply((Account) pair.getOwner())
