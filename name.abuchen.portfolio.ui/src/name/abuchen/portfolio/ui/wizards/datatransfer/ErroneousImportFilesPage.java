@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -11,9 +13,14 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 
+import name.abuchen.portfolio.datatransfer.pdf.PDFImportAssistant;
 import name.abuchen.portfolio.ui.Images;
 import name.abuchen.portfolio.ui.Messages;
 import name.abuchen.portfolio.ui.util.viewers.CopyPasteSupport;
@@ -71,11 +78,16 @@ public class ErroneousImportFilesPage extends AbstractWizardPage
     {
         Composite container = new Composite(parent, SWT.NULL);
         setControl(container);
+        GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
+
+        // Tree viewer container
+        Composite treeContainer = new Composite(container, SWT.NONE);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(treeContainer);
 
         TreeColumnLayout layout = new TreeColumnLayout();
-        container.setLayout(layout);
+        treeContainer.setLayout(layout);
 
-        TreeViewer treeViewer = new TreeViewer(container, SWT.BORDER | SWT.FULL_SELECTION);
+        TreeViewer treeViewer = new TreeViewer(treeContainer, SWT.BORDER | SWT.FULL_SELECTION);
         CopyPasteSupport.enableFor(treeViewer);
         treeViewer.setContentProvider(new ErrorContentProvider());
         treeViewer.getTree().setHeaderVisible(true);
@@ -84,6 +96,31 @@ public class ErroneousImportFilesPage extends AbstractWizardPage
         addColumns(treeViewer, layout);
 
         treeViewer.setInput(errors);
+
+        // Button to copy failed files
+        Button copyButton = new Button(container, SWT.PUSH);
+        copyButton.setText(Messages.PDFImportWizardCopyFailedFiles);
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(copyButton);
+        copyButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.SAVE);
+                dialog.setText(Messages.PDFImportWizardSelectFolderForFailedFiles);
+                String selectedFolder = dialog.open();
+                if (selectedFolder != null)
+                {
+                    File targetFolder = new File(selectedFolder);
+                    List<File> copiedFiles = PDFImportAssistant.copyFailedFilesToFolder(errors, targetFolder);
+                    if (!copiedFiles.isEmpty())
+                    {
+                        setMessage(String.format(Messages.PDFImportWizardFilesCopied, copiedFiles.size(),
+                                        targetFolder.getAbsolutePath()), INFORMATION);
+                    }
+                }
+            }
+        });
     }
 
     private void addColumns(TreeViewer viewer, TreeColumnLayout layout)

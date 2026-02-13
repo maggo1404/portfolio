@@ -2,6 +2,9 @@ package name.abuchen.portfolio.datatransfer.pdf;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -239,5 +242,62 @@ public class PDFImportAssistant
         securityCache.addMissingSecurityItems(itemsByExtractor);
 
         return itemsByExtractor;
+    }
+
+    /**
+     * Copies files that failed to import to a designated folder for analysis.
+     * 
+     * @param errors
+     *            Map of files that failed to import with their exceptions
+     * @param targetFolder
+     *            The folder to copy failed files to
+     * @return List of files that were successfully copied
+     */
+    public static List<File> copyFailedFilesToFolder(Map<File, List<Exception>> errors, File targetFolder)
+    {
+        List<File> copiedFiles = new ArrayList<>();
+
+        if (errors == null || errors.isEmpty() || targetFolder == null)
+            return copiedFiles;
+
+        // Create target folder if it doesn't exist
+        if (!targetFolder.exists())
+        {
+            if (!targetFolder.mkdirs())
+            {
+                PortfolioLog.error("Failed to create folder for failed imports: " + targetFolder.getAbsolutePath()); //$NON-NLS-1$
+                return copiedFiles;
+            }
+        }
+
+        for (File sourceFile : errors.keySet())
+        {
+            try
+            {
+                Path source = sourceFile.toPath();
+                Path target = targetFolder.toPath().resolve(sourceFile.getName());
+
+                // If file already exists, add timestamp to avoid overwriting
+                if (Files.exists(target))
+                {
+                    String baseName = sourceFile.getName();
+                    int dotIndex = baseName.lastIndexOf('.');
+                    String nameWithoutExt = dotIndex > 0 ? baseName.substring(0, dotIndex) : baseName;
+                    String extension = dotIndex > 0 ? baseName.substring(dotIndex) : ""; //$NON-NLS-1$
+                    target = targetFolder.toPath()
+                                    .resolve(nameWithoutExt + "_" + System.currentTimeMillis() + extension); //$NON-NLS-1$
+                }
+
+                Files.copy(source, target, StandardCopyOption.COPY_ATTRIBUTES);
+                copiedFiles.add(target.toFile());
+                PortfolioLog.info("Copied failed import file to: " + target); //$NON-NLS-1$
+            }
+            catch (IOException e)
+            {
+                PortfolioLog.error("Failed to copy file " + sourceFile.getName() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+            }
+        }
+
+        return copiedFiles;
     }
 }

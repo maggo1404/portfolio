@@ -1185,10 +1185,13 @@ public class Messages extends NLS
     public static String PDFImportErrorParsingDocument;
     public static String PDFImportFilterName;
     public static String PDFImportWizardAssistant;
+    public static String PDFImportWizardCopyFailedFiles;
     public static String PDFImportWizardDescription;
     public static String PDFImportWizardErroneousFiles;
     public static String PDFImportWizardExtractor;
+    public static String PDFImportWizardFilesCopied;
     public static String PDFImportWizardMsgExtracting;
+    public static String PDFImportWizardSelectFolderForFailedFiles;
     public static String PDFImportWizardTitle;
     public static String PerformanceChartLabelCPI;
     public static String PerformanceChartLabelEntirePortfolio;
